@@ -1,0 +1,139 @@
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+<title>Vector</title>
+<style>
+*{
+border:none;
+outline:none;
+}
+.inpt{
+width:60px;
+height:30px;
+box-shadow:0px 0px 4px gray;
+padding:5px;
+}
+input[type='button']{
+height:30px;
+box-shadow:0px 0px 4px gray;
+padding:5px;
+}
+#sum{
+box-shadow:0px 0px 4px gray;
+height:30px;
+width:205px;
+padding:5px;
+text-align:center;
+font-size:11px;
+}
+</style>
+</head>
+<body>
+<canvas id="plot" width="345" height="345" style="border:1px solid #000000;"></canvas>
+<br><br>
+<input type="button" value="-" onclick="zoomOut()"><input type="text" class="inpt" id="zoomPer" value="100%" readonly><input type="button" value="+" onclick="zoomIn()"><br><br>
+<table>
+<tr><td>X:</td><td><input class="inpt" type="number" id="x"></td><td>Y:</td><td><input class="inpt" type="number" id="y"></td><td><input type="button" value="add" onclick="addComponentBasedVector()"></td></tr>
+<tr><td>mag:</td><td><input class="inpt" type="number" id="mag"></td><td>angle:</td><td><input class="inpt" type="number" id="angle"></td><td><input type="button" value="add" onclick="addMagAngleBasedVector()"></td></tr>
+</table>
+Sum: <input type="text" id="sum" readonly>
+<ul id="vctrLst"></ul>
+
+<script>
+var vectors = [];
+var vctrLst =document.querySelector("#vctrLst");
+var plot = document.getElementById("plot");
+var ctx = plot.getContext("2d");
+
+var colors = ["red","green","blue","orange","violet"];
+var currColor = 0;
+var zoomVal = 1;
+var zoomPer = document.querySelector("#zoomPer");
+var sum = document.querySelector("#sum");
+function lineTo(x,y){
+x=zoomVal*parseFloat(x);
+y=zoomVal*parseFloat(y);
+ctx.beginPath();
+ctx.moveTo(plot.width/2, plot.height/2);
+ctx.lineTo(plot.width/2+x, plot.height/2-y);
+ctx.strokeStyle = colors[currColor];
+currColor=(currColor+1)%colors.length;
+ctx.stroke();
+
+}
+
+function clear(){
+ctx.strokeStyle = "#000000";
+ctx.clearRect(0, 0, plot.width, plot.height);
+ctx.beginPath();
+ctx.moveTo(0, plot.height/2);
+ctx.lineTo(plot.width, plot.height/2);
+ctx.stroke();
+ctx.moveTo(plot.width/2, 0);
+ctx.lineTo(plot.width/2, plot.height);
+ctx.stroke();
+}
+
+clear();
+
+function zoomIn(){
+  zoomVal=zoomVal+0.5;
+  addAll();
+  zoomPer.value=(zoomVal*100)+"%";
+}
+
+function zoomOut(){
+  if(zoomVal<=0.50){
+    alert("reached minimum zoomOut value");
+    return;
+  }
+  zoomVal=zoomVal-0.25;
+  addAll();
+  zoomPer.value=(zoomVal*100)+"%";
+}
+
+function addAll(){
+clear();
+  var sumX = 0.0;
+  var sumY = 0.0;
+  for(var i=0;i<vectors.length;i++){
+    lineTo(vectors[i].x,vectors[i].y);
+	sumX+=parseFloat(vectors[i].x);
+	sumY+=parseFloat(vectors[i].y);
+  }
+  if(vectors.length>1){
+     lineTo(sumX,sumY);
+  }
+  var sumMag = Math.sqrt(sumX*sumX+sumY*sumY).toFixed(2);
+  var sumNgle = ((Math.atan(sumY/sumX)*180)/Math.PI).toFixed(2);
+  sum.value="("+sumX.toFixed(2)+")i + ("+sumY.toFixed(2)+")j ["+sumMag+" @ "+sumNgle+" degrees]";
+}
+
+function addVector(x,y){
+  vectors.push({x:x,y:y});
+  var li = document.createElement("li");
+  li.innerText = "("+x+")i + ("+y+")j";
+  vctrLst.appendChild(li);
+  addAll();
+}
+function addComponentBasedVector(){
+  var xInpt = document.querySelector("#x");
+  var yInpt = document.querySelector("#y");
+  var x = xInpt.value;
+  var y = yInpt.value;
+  addVector(x,y);
+  xInpt.value="";
+  yInpt.value="";
+}
+function addMagAngleBasedVector(){
+  var magInpt = document.querySelector("#mag");
+  var angleInpt = document.querySelector("#angle");
+  var x = parseFloat(magInpt.value)*Math.cos(((2*Math.PI)/360)*angleInpt.value);
+  var y = parseFloat(magInpt.value)*Math.sin(((2*Math.PI)/360)*angleInpt.value);
+  addVector(x.toFixed(2),y.toFixed(2));
+  magInpt.value="";
+  angleInpt.value="";
+}
+</script>
+</body>
+</html>
