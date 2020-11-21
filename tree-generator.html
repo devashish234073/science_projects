@@ -1,0 +1,105 @@
+<html>
+<head>
+<style>
+*{
+outline:none;
+}
+input{
+margin-left:auto;
+margin-right:auto;
+}
+p{
+margin-left:auto;
+margin-right:auto;
+width:60px;
+text-align:center;
+background-color:khaki;
+border-radius:10px;
+color:green;
+font-size:10px;
+height:15px;
+}
+table{
+border-collapse:collapse;
+}
+td{
+border:1px solid lightgreen;
+}
+</style>
+</head>
+<body>
+<input type="button" id="treeCreator" onclick="doIt()" value="Create Tree"/>
+<table>
+</table>
+<script>
+function node(key){
+  this.key = key;
+  this.left = null;
+  this.right = null;
+}
+
+var table = document.querySelector("table");
+var MAXLEVEL = 6;
+var colspan = Math.pow(2,MAXLEVEL-1);
+function createTree(level,curr){
+   if(level<MAXLEVEL){
+      curr.left = new node(parseInt(Math.random()*100));
+      createTree(level+1,curr.left);
+      curr.right = new node(parseInt(Math.random()*100));
+      createTree(level+1,curr.right);
+   }
+}
+
+var done = false;
+function doIt(){
+  if(!done){
+    done = true;
+    MAXLEVEL = parseInt(prompt("Enter the number of levels you want:"));
+    colspan = Math.pow(2,MAXLEVEL-1);
+    var root = new node(parseInt(Math.random()*100));
+    createTree(1,root);
+    traverse(1,root);
+    var treeCreator = document.querySelector("#treeCreator");
+    treeCreator.value = MAXLEVEL+" level Tree";
+  } else {
+    alert("tree already created,please refresh to create fresh table again");
+  }
+}
+
+function traverse(level,node){
+   if(node!=null){
+      var trs = document.querySelectorAll("tr");
+      var tr;
+      if(trs.length<level){
+         tr=document.createElement("tr");
+         table.appendChild(tr);
+      } else {
+         tr=trs[level-1];
+      }
+      var td = document.createElement("td");
+      var p = document.createElement("p");
+      p.innerText = node.key;
+      td.appendChild(p);
+      tr.appendChild(td);
+      td.setAttribute("colspan",(colspan/Math.pow(2,level-1)));
+      console.log("colspan at level "+level+" is "+colspan+"/"+Math.pow(2,level-1)+" = "+(colspan/Math.pow(2,level-1)));
+      traverse(level+1,node.left);
+      console.log(level,node.key);
+      traverse(level+1,node.right);
+   }
+}
+
+
+
+/*root.left = new node("two");
+root.right = new node("three");
+
+root.left.left = new node("two.1");
+root.left.right = new node("two.2");
+root.right.left = new node("three.1");
+root.right.right = new node("three.2");*/
+
+
+</script>
+</body>
+</html>
